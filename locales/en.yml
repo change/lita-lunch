@@ -2,3 +2,12 @@ en:
   lita:
     handlers:
       lunch:
+        office:
+          create:
+            success: Ok, I have created the office named “%{name}” in the %{timezone} timezone.
+            help:
+              command: lunch create office <name> <timezone>
+              description: Create a new office in a given timezone (requires an admin)
+            error:
+              exists: Sorry, the office named “%{name}” already exists.
+              timzone: Sorry, I cannot find the “%{timezone}” timezone.
