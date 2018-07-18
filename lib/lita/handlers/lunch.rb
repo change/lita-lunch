@@ -13,21 +13,21 @@ module Lita
       def create_office(response)
         (name, tz) = response.matches.first
         begin
-          if (office = redis.hget('offices', normalize_office_name(name))) # intentional assignment
-            response.reply(t('office.create.error.exists', name: JSON.parse(office)['name']))
+          office = Office.find(robot, name)
+
+          if office
+            response.reply(t('office.create.error.exists', name: office.name))
             return
           end
 
-          tz = TZInfo::Timezone.get(tz)
+          office = Office.new(robot, name, tz)
         rescue TZInfo::InvalidTimezoneIdentifier
           response.reply(t('office.create.error.timezone', timezone: tz))
           return
-        rescue JSON::ParserError # rubocop:diable Lint/HandleExceptions
-          # NOOP: Let it overwrite it.
         end
 
-        redis.hset('offices', normalize_office_name(name), { name: name, timezone: tz.name }.to_json)
-        response.reply(t('office.create.success', name: name, timezone: tz.name))
+        office.save
+        response.reply(t('office.create.success', name: name, timezone: office.timezone.name))
       end
 
       def list_offices(response)
