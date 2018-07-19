@@ -3,9 +3,15 @@
 require 'tzinfo'
 require 'json'
 
+require 'byebug'
+
 module Lita
   module Handlers
     class Lunch < Handler
+      route(/^lunch list offices?$/, :list_offices, command: true, help: {
+              t('office.list.help.command') => t('office.list.help.description')
+            })
+
       route(/^lunch create office\s(.+)\s(\S+)$/, :create_office, command: true, restrict_to: :lunch_admins, help: {
               t('office.create.help.command') => t('office.create.help.description')
             })
@@ -31,20 +37,9 @@ module Lita
       end
 
       def list_offices(response)
-        offices = redis.hgetall('offices').values
+        offices = Office.all(robot).map(&:name)
 
-        offices.map! do |o|
-          JSON.parse(o)['name']
-        rescue StandardError
-          nil
-        end
-
-        offices.compact!
-
-        if offices.empty?
-          response.reply(t('office.list.empty'))
-          return
-        end
+        return response.reply(t('office.list.empty')) if offices.empty?
 
         offices.sort_by!(&:downcase)
 

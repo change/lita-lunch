@@ -11,3 +11,9 @@ en:
             error:
               exists: Sorry, the office named “%{name}” already exists.
               timzone: Sorry, I cannot find the “%{timezone}” timezone.
+          list:
+            empty: The office list is empty!
+            response: "Office names:\n%{office_names_separated_by_newlines}"
+            help:
+              command: lunch list offices
+              description: Show the list of lunchable offices

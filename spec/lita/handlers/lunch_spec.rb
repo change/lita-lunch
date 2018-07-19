@@ -3,6 +3,7 @@
 # rubocop:enable Style/FrozenStringLiteralComment
 
 RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
+  it { is_expected.to route_command('lunch list offices').to(:list_offices) }
   it do
     is_expected.to route_command(
       'lunch create office office tz'
@@ -13,7 +14,7 @@ RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
     shared_examples 'does not create an office' do
       it 'does not create an office' do
         send_command(command)
-        send_command('lunch office list')
+        send_command('lunch list offices')
         expect(replies.last).to include 'empty'
       end
     end
@@ -64,9 +65,22 @@ RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
 
       it 'creates the office' do
         send_command('lunch create office Mordor UTC')
-        send_command('lunch office list')
+        send_command('lunch list offices')
         expect(replies.last).to include 'Mordor'
       end
+    end
+  end
+
+  describe '#list_offices' do
+    before do
+      robot.auth.add_user_to_group!(user, :lunch_admins)
+      send_command('lunch create office Magrathea UTC')
+      send_command('lunch create office Betelgeuse UTC')
+    end
+
+    it 'lists offices alphabetically' do
+      send_command('lunch list offices')
+      expect(replies.last).to match(/Betelgeuse\nMagrathea/)
     end
   end
 end

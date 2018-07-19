@@ -58,4 +58,15 @@ RSpec.describe Lita::Handlers::Lunch::Office do
       end
     end
   end
+
+  describe '#all' do
+    before do
+      described_class.new(robot, name, timezone).save
+      described_class.new(robot, 'Palmer Station', 'Antarctica/Palmer').save
+    end
+
+    it 'returns all existing offices' do
+      expect(described_class.all(robot).map(&:name)).to eq [name, 'Palmer Station']
+    end
+  end
 end

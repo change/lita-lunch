@@ -17,15 +17,7 @@ module Lita
         def self.find(robot, name)
           handler = new(robot, name, 'UTC')
           json = handler.redis.hget(REDIS_KEY, normalize_name(name))
-          return nil unless json
-          begin
-            data = JSON.parse(json)
-            return new(robot, data['name'], data['timezone'])
-          rescue JSON::ParserError
-            return nil
-          rescue TZInfo::InvalidTimezoneIdentifier
-            return nil
-          end
+          from_json(robot, json)
         end
 
         def initialize(robot, name, timezone)
@@ -39,6 +31,21 @@ module Lita
                      { name: @name, timezone: @timezone.canonical_identifier }.to_json)
         end
 
+        def self.all(robot)
+          new(robot, '_handler', 'UTC').redis.hgetall(REDIS_KEY).values.map { |j| from_json(robot, j) }.compact
+        end
+
+        def self.from_json(robot, json)
+          return nil unless json
+          begin
+            data = JSON.parse(json)
+            return new(robot, data['name'], data['timezone'])
+          rescue JSON::ParserError
+            return nil
+          rescue TZInfo::InvalidTimezoneIdentifier
+            return nil
+          end
+        end
 
         def self.normalize_name(name)
           name.downcase
