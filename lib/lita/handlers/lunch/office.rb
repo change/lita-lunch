@@ -10,7 +10,8 @@ module Lita
         include Lita::Handler::Common
         namespace 'lunch'
 
-        REDIS_KEY = 'offices'
+        REDIS_PREFIX = 'offices'
+        REDIS_KEY = "#{REDIS_PREFIX}:instances"
 
         attr_reader :name, :timezone
 
@@ -29,6 +30,18 @@ module Lita
         def save
           redis.hset(REDIS_KEY, self.class.normalize_name(@name),
                      { name: @name, timezone: @timezone.canonical_identifier }.to_json)
+        end
+
+        def add_participant(participant)
+          redis.sadd("#{REDIS_PREFIX}:#{self.class.normalize_name(name)}", participant.id)
+        end
+
+        def remove_participant(participant)
+          redis.srem("#{REDIS_PREFIX}:#{self.class.normalize_name(name)}", participant.id)
+        end
+
+        def as_json
+          self.class.normalize_name(@name)
         end
 
         def self.all(robot)

@@ -4,6 +4,9 @@
 
 RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
   it { is_expected.to route_command('lunch list offices').to(:list_offices) }
+  it { is_expected.to route_command('lunch office').to(:show_office) }
+  it { is_expected.to route_command('lunch office Magrathea').to(:select_office) }
+  it { is_expected.to route_command('lunch office @zaphod Magrathea').to(:select_office) }
   it do
     is_expected.to route_command(
       'lunch create office office tz'
@@ -81,6 +84,63 @@ RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
     it 'lists offices alphabetically' do
       send_command('lunch list offices')
       expect(replies.last).to match(/Betelgeuse\nMagrathea/)
+    end
+  end
+
+  describe '#show_office' do
+    it 'informs the user when they have no office' do
+      send_command('lunch office')
+      expect(replies.last).to include 'Sorry'
+    end
+
+    context 'when the user has an office' do
+      before do
+        robot.auth.add_user_to_group!(user, :lunch_admins)
+        send_command('lunch create office Magrathea UTC')
+        send_command('lunch office Magrathea')
+      end
+
+      it 'informs the user of their office' do
+        send_command('lunch office')
+        expect(replies.last).to eq 'Magrathea'
+      end
+    end
+  end
+
+  describe '#select_office' do
+    context 'when the office does not exist' do
+      it 'informs the user' do
+        send_command('lunch office Magrathea')
+        expect(replies.last).to include 'list office'
+      end
+
+      context 'when the user has an existing office' do
+        it 'does not update the user' do
+          expect(user).not_to receive(:save)
+          send_command('lunch office Magrathea')
+        end
+
+        it 'does not update the Office list' do
+          expect_any_instance_of(Lita::Handlers::Lunch::Office).not_to receive(:remove_participant)
+        end
+      end
+    end
+
+    context 'when the office exists' do
+      before do
+        robot.auth.add_user_to_group!(user, :lunch_admins)
+        send_command('lunch create office Magrathea UTC')
+      end
+
+      it 'adds the office to the user' do
+        send_command('lunch office Magrathea')
+        expect(Lita::Handlers::Lunch::Participant.from_user(robot, user).office.as_json).to eq 'magrathea'
+      end
+
+      it 'adds the user to the Office list' do
+        expect_any_instance_of(Lita::Handlers::Lunch::Office).to receive(:add_participant)
+        send_command('lunch office Magrathea')
+      end
     end
   end
 end

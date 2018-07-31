@@ -17,3 +17,21 @@ en:
             help:
               command: lunch list offices
               description: Show the list of lunchable offices
+          show:
+            help:
+              command: lunch office
+              description: Show the office in which you are currently having lunch
+          select:
+            unknown_office: Sorry, I cannot find that office. Please use `%{list_command}` to get a list of offices.
+            success_with_include: You have been added to the %{office} lunch pool, and we have enabled you for the next party!
+            move_with_include: You have been moved to the %{office} lunch pool, and we have enabled you for the next party!
+            help:
+              self:
+                command: lunch office <office name>
+                description: Add yourself to the <office name> office
+              other:
+                command: lunch office @user <office name>
+                description: Add @user to the <office name> office
+        participant:
+          no_office: Sorry, you do not seem to have an office.
+          user_not_found: Sorry, I do not know who that is?
