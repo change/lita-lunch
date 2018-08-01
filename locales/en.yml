@@ -2,6 +2,21 @@ en:
   lita:
     handlers:
       lunch:
+        participate:
+          added:
+            with_office:
+              self: We have added you to the next lunch roulette!
+              other: We have added them to the next lunch roulette!
+            no_office:
+              self: We have added you to the next lunch roulette, however you have not chosen an office. Please use `%{select_command}` to do so.
+              other: We have added them to the next lunch roulette, however they have not chosen an office. Please use `%{select_command}` to do so for them.
+          help:
+            self:
+              command: lunch today
+              description: Add yourself to the next lunch roulette.
+            other:
+              command: lunch today [for] @user
+              description: Add @user to the next lunch roulette.
         office:
           create:
             success: Ok, I have created the office named “%{name}” in the %{timezone} timezone.
@@ -23,8 +38,8 @@ en:
               description: Show the office in which you are currently having lunch
           select:
             unknown_office: Sorry, I cannot find that office. Please use `%{list_command}` to get a list of offices.
-            success_with_include: You have been added to the %{office} lunch pool, and we have enabled you for the next party!
-            move_with_include: You have been moved to the %{office} lunch pool, and we have enabled you for the next party!
+            success_with_include: You have been added to the %{office} lunch pool, and we have enabled you for the next roulette spin!
+            move_with_include: You have been moved to the %{office} lunch pool, and we have enabled you for the next roulette spin!
             help:
               self:
                 command: lunch office <office name>

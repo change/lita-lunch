@@ -3,6 +3,9 @@
 # rubocop:enable Style/FrozenStringLiteralComment
 
 RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
+  it { is_expected.to route_command('lunch today').to(:participate) }
+  it { is_expected.to route_command('lunch today @zaphod').to(:participate) }
+  it { is_expected.to route_command('lunch today for @zaphod').to(:participate) }
   it { is_expected.to route_command('lunch list offices').to(:list_offices) }
   it { is_expected.to route_command('lunch office').to(:show_office) }
   it { is_expected.to route_command('lunch office Magrathea').to(:select_office) }
@@ -11,6 +14,56 @@ RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
     is_expected.to route_command(
       'lunch create office office tz'
     ).with_authorization_for(:lunch_admins).to(:create_office)
+  end
+
+  describe '#participate' do
+    shared_examples 'participation trophies' do
+      before { target_user }
+      shared_examples 'updates state' do
+        it 'updates the user state' do
+          send_command(command)
+          expect(Lita::Handlers::Lunch::Participant.from_user(robot, target_user).include_in_next).to be true
+        end
+      end
+
+      context 'when the user does not have an office' do
+        include_examples 'updates state'
+
+        it 'warns the user about the missing office' do
+          send_command(command)
+          expect(replies.last).to include 'however'
+        end
+      end
+
+      context 'when the user has an office' do
+        before do
+          robot.auth.add_user_to_group!(user, :lunch_admins)
+          send_command('lunch create office Magrathea UTC')
+          send_command("lunch office @#{target_user.mention_name} Magrathea")
+        end
+
+        include_examples 'updates state'
+
+        it 'informs the user of their participation' do
+          send_command(command)
+          expect(replies.last).to include 'next lunch'
+        end
+      end
+    end
+
+    context 'without a user specified' do
+      include_examples 'participation trophies' do
+        let(:target_user) { user }
+        let(:command) { 'lunch today' }
+      end
+    end
+
+    context 'with a user specified' do
+      include_examples 'participation trophies' do
+        let(:target_user) { Lita::User.create(123, name: 'Zaphod', mention_name: 'zaphod').tap(&:save) }
+        let(:command) { 'lunch today @zaphod' }
+      end
+    end
   end
 
   describe '#create_office' do

@@ -8,6 +8,11 @@ require 'byebug'
 module Lita
   module Handlers
     class Lunch < Handler
+      route(/^lunch today\s*(?:for\s+)?(@.*?)?\s*$/, :participate, command: true, help: {
+              t('office.participate.help.self.command') => t('office.participate.help.self.description'),
+              t('office.participate.help.other.command') => t('office.participate.help.other.description')
+            })
+
       route(/^lunch list offices?$/, :list_offices, command: true, help: {
               t('office.list.help.command') => t('office.list.help.description')
             })
@@ -24,6 +29,23 @@ module Lita
       route(/^lunch create office\s(.+)\s(\S+)$/, :create_office, command: true, restrict_to: :lunch_admins, help: {
               t('office.create.help.command') => t('office.create.help.description')
             })
+
+      def participate(response)
+        require 'byebug'
+        # byebug ; 1
+        participant = pick_recipient(response)
+        participant.include_in_next = true
+        participant.save
+
+        type = participant.id == response.user.id ? 'self' : 'other'
+
+        if participant.office
+          response.reply(t("participate.added.with_office.#{type}"))
+        else
+          response.reply(t("participate.added.no_office.#{type}",
+                           select_command: t("office.select.help.#{type}.command")))
+        end
+      end
 
       def create_office(response)
         (name, tz) = response.matches.first
