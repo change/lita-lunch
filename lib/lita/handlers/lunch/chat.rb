@@ -29,13 +29,13 @@ module Lita
                 t('office.select.help.other.command') => t('office.select.help.other.description')
               })
 
-        route(/^lunch create office\s(.+)\s(\S+)$/, :create_office, command: true, restrict_to: :lunch_admins, help: {
-                t('office.create.help.command') => t('office.create.help.description')
-              })
+        route(/^lunch create office\s(.+)\s+(.+)\s+(\S+)$/, :create_office, command: true, restrict_to: :lunch_admins,
+                                                                            help: {
+                                                                              t('office.create.help.command') =>
+                                                                              t('office.create.help.description')
+                                                                            })
 
         def participate(response)
-          require 'byebug'
-          # byebug ; 1
           participant = pick_recipient(response)
           participant.include_in_next = true
           participant.save
@@ -51,7 +51,7 @@ module Lita
         end
 
         def create_office(response)
-          (name, tz) = response.matches.first
+          (name, channel, tz) = response.matches.first
           begin
             office = Office.find(robot, name)
 
@@ -60,7 +60,7 @@ module Lita
               return
             end
 
-            office = Office.new(robot, name, tz)
+            office = Office.new(robot, name, channel, tz)
           rescue TZInfo::InvalidTimezoneIdentifier
             response.reply(t('office.create.error.timezone', timezone: tz))
             return

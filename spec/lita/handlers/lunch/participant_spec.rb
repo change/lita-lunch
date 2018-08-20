@@ -5,7 +5,9 @@ require 'lita/handlers/lunch/office'
 
 RSpec.describe Lita::Handlers::Lunch::Participant do
   let(:robot) { instance_double 'Lita::Robot' }
-  let(:office_object) { Lita::Handlers::Lunch::Office.new(robot, 'SF', 'UTC') }
+  # let(:room) { instance_double 'Lita::Room', id: 42 }
+  let(:room) { Lita::Room.create_or_update('magrathea') }
+  let(:office_object) { Lita::Handlers::Lunch::Office.new(robot, 'SF', room, 'UTC') }
 
   describe '#new' do
     it 'sets id when passed' do

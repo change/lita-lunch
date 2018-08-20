@@ -13,31 +13,36 @@ module Lita
         REDIS_PREFIX = 'offices'
         REDIS_KEY = "#{REDIS_PREFIX}:instances"
 
-        attr_reader :name, :timezone
+        attr_reader :name, :room, :timezone
 
         def self.find(robot, name)
-          handler = new(robot, name, 'UTC')
+          handler = new(robot, name, nil, 'UTC')
           json = handler.redis.hget(REDIS_KEY, normalize_name(name))
           from_json(robot, json)
         end
 
-        def initialize(robot, name, timezone)
+        def initialize(robot, name, room, timezone)
           super(robot)
           @name = name
+
+          if room
+            @room = room.respond_to?(:id) ? room : (Lita::Room.find_by_name(room) || Lita::Room.find_by_id(room))
+          end
+
           @timezone = timezone.respond_to?(:canonical_identifier) ? timezone : TZInfo::Timezone.get(timezone.to_s)
         end
 
         def save
           redis.hset(REDIS_KEY, self.class.normalize_name(@name),
-                     { name: @name, timezone: @timezone.canonical_identifier }.to_json)
+                     { name: @name, room: room&.name, timezone: @timezone.canonical_identifier }.to_json)
         end
 
         def add_participant(participant)
-          redis.sadd("#{REDIS_PREFIX}:#{self.class.normalize_name(name)}", participant.id)
+          redis.sadd("#{REDIS_PREFIX}:#{@room.id}", participant.id)
         end
 
         def remove_participant(participant)
-          redis.srem("#{REDIS_PREFIX}:#{self.class.normalize_name(name)}", participant.id)
+          redis.srem("#{REDIS_PREFIX}:#{@room.id}", participant.id)
         end
 
         def as_json
@@ -45,14 +50,14 @@ module Lita
         end
 
         def self.all(robot)
-          new(robot, '_handler', 'UTC').redis.hgetall(REDIS_KEY).values.map { |j| from_json(robot, j) }.compact
+          new(robot, '_handler', nil, 'UTC').redis.hgetall(REDIS_KEY).values.map { |j| from_json(robot, j) }.compact
         end
 
         def self.from_json(robot, json)
           return nil unless json
           begin
             data = JSON.parse(json)
-            return new(robot, data['name'], data['timezone'])
+            return new(robot, data['name'], data['room'], data['timezone'])
           rescue JSON::ParserError
             return nil
           rescue TZInfo::InvalidTimezoneIdentifier

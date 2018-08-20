@@ -6,10 +6,11 @@ RSpec.describe Lita::Handlers::Lunch::Office do
   let(:robot) { instance_double 'Lita::Robot' }
 
   let(:name) { 'Office Name' }
+  let(:room) { instance_double 'Lita::Room' }
   let(:timezone) { 'PST8PDT' }
 
   describe '#new' do
-    subject { described_class.new(robot, name, timezone) }
+    subject { described_class.new(robot, name, room, timezone) }
 
     it 'converts the timezone string to a TZInfo object' do
       expect(subject.timezone).to respond_to :canonical_identifier
@@ -17,7 +18,7 @@ RSpec.describe Lita::Handlers::Lunch::Office do
   end
 
   describe '#save' do
-    subject { described_class.new(robot, name, timezone) }
+    subject { described_class.new(robot, name, room, timezone) }
 
     it 'persists data to Redis' do
       subject.save
@@ -32,7 +33,7 @@ RSpec.describe Lita::Handlers::Lunch::Office do
   describe '#find' do
     context 'when the office is present' do
       before do
-        described_class.new(robot, name, timezone).save
+        described_class.new(robot, name, room, timezone).save
       end
 
       it 'finds by name' do
@@ -51,7 +52,7 @@ RSpec.describe Lita::Handlers::Lunch::Office do
     end
 
     context 'when the office is ill-formed' do
-      before { described_class.new(robot, name, timezone).redis.hset(described_class::REDIS_KEY, name, 'fnord') }
+      before { described_class.new(robot, name, room, timezone).redis.hset(described_class::REDIS_KEY, name, 'fnord') }
 
       it 'retuns nil' do
         expect(described_class.find(robot, name)).to be_nil
@@ -61,12 +62,12 @@ RSpec.describe Lita::Handlers::Lunch::Office do
 
   describe '#all' do
     before do
-      described_class.new(robot, name, timezone).save
-      described_class.new(robot, 'Palmer Station', 'Antarctica/Palmer').save
+      described_class.new(robot, name, room, timezone).save
+      described_class.new(robot, 'Palmer Station', room, 'Antarctica/Palmer').save
     end
 
     it 'returns all existing offices' do
-      expect(described_class.all(robot).map(&:name)).to eq [name, 'Palmer Station']
+      expect(described_class.all(robot).map(&:name).sort).to eq [name, 'Palmer Station']
     end
   end
 end
