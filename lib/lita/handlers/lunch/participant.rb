@@ -5,7 +5,7 @@ require 'json'
 
 module Lita
   module Handlers
-    class Lunch
+    module Lunch
       class Participant
         include Lita::Handler::Common
         namespace 'lunch'

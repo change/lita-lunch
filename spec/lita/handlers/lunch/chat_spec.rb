@@ -2,7 +2,7 @@
 # Lita has a bug (fixed in master) that causes frozen strings to blow up tests
 # rubocop:enable Style/FrozenStringLiteralComment
 
-RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
+RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
   it { is_expected.to route_command('lunch today').to(:participate) }
   it { is_expected.to route_command('lunch today @zaphod').to(:participate) }
   it { is_expected.to route_command('lunch today for @zaphod').to(:participate) }
@@ -115,7 +115,7 @@ RSpec.describe Lita::Handlers::Lunch, lita_handler: true do
 
         it 'does not overwrite the existing office' do
           send_command(command)
-          expect(described_class::Office.find(robot, 'Magrathea').timezone.canonical_identifier).to eq 'PST8PDT'
+          expect(Lita::Handlers::Lunch::Office.find(robot, 'Magrathea').timezone.canonical_identifier).to eq 'PST8PDT'
         end
       end
 
