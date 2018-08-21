@@ -28,6 +28,7 @@ RSpec.describe Lita::Handlers::Lunch::Participant do
 
         context 'when it exists' do
           before { office_object.save }
+
           it 'sets the office to the object' do
             expect(described_class.new(robot, office: office).office.as_json).to eq office_object.as_json
           end
@@ -43,8 +44,9 @@ RSpec.describe Lita::Handlers::Lunch::Participant do
   end
 
   describe '#save' do
-    let(:id) { 42 }
     subject { described_class.new(robot, id: id, office: office_object, include_in_next: true) }
+
+    let(:id) { 42 }
 
     it 'persists data to Redis' do
       subject.save

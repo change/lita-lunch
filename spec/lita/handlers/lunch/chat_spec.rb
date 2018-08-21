@@ -3,6 +3,9 @@
 # rubocop:enable Style/FrozenStringLiteralComment
 
 RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
+  let(:betelgeuse) { Lita::Room.create_or_update('betelgeuse') }
+  let(:magrathea) { Lita::Room.create_or_update('magrathea') }
+
   it { is_expected.to route_command('lunch today').to(:participate) }
   it { is_expected.to route_command('lunch today @zaphod').to(:participate) }
   it { is_expected.to route_command('lunch today for @zaphod').to(:participate) }
@@ -16,12 +19,10 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
     ).with_authorization_for(:lunch_admins).to(:create_office)
   end
 
-  let(:magrathea) { Lita::Room.create_or_update('magrathea') }
-  let(:betelgeuse) { Lita::Room.create_or_update('betelgeuse') }
-
   describe '#participate' do
     shared_examples 'participation trophies' do
       before { target_user }
+
       shared_examples 'updates state' do
         it 'updates the user state' do
           send_command(command)
@@ -80,6 +81,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
 
     context 'with a non-admin user' do
       let(:command) { "lunch create office Magrathea ##{magrathea.name} UTC" }
+
       it 'prevents the user from adding an office' do
         send_command(command)
         expect(replies).to be_empty

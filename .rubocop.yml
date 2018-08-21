@@ -1,3 +1,5 @@
+require: rubocop-rspec
+
 LineLength:
   Max: 120
 
@@ -13,4 +15,19 @@ Metrics/AbcSize:
 
 # Rely on AbcSize
 MethodLength:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 10
+
+# TODO: Fix these
+RSpec/NamedSubject:
+  Enabled: false
+RSpec/MessageSpies:
+  Enabled: false
+# TODO: And maybe this
+RSpec/AnyInstance:
   Enabled: false
