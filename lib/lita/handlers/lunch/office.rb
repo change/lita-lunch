@@ -3,11 +3,15 @@
 require 'tzinfo'
 require 'json'
 
+require 'lita/handlers/lunch/office/schedule'
+
 module Lita
   module Handlers
     module Lunch
       class Office
         include Lita::Handler::Common
+        include Lita::Handlers::Lunch::Office::Schedule::Mixin
+
         namespace 'lunch'
 
         REDIS_PREFIX = 'offices'
@@ -43,6 +47,10 @@ module Lita
 
         def remove_participant(participant)
           redis.srem("#{REDIS_PREFIX}:#{@room.id}", participant.id)
+        end
+
+        def participants
+          redis.smembers("#{REDIS_PREFIX}:#{@room.id}").map { |id| Participant.find(id) }
         end
 
         def as_json

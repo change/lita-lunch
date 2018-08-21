@@ -3,6 +3,7 @@ en:
     handlers:
       lunch:
         participate:
+          list: 'Your lunch group today is: %{list}'
           added:
             with_office:
               self: We have added you to the next lunch roulette!
@@ -47,6 +48,7 @@ en:
               other:
                 command: lunch office @user <office name>
                 description: Add @user to the <office name> office
+          reminder: '@here: Don’t forget to sign up for Lunch Roulette today! Use `%{participate_command}`'
         participant:
-          no_office: Sorry, you do not seem to have an office.
+          no_office: Sorry, you do not seem to have an office. Please use `%{select_command}` to add one.
           user_not_found: Sorry, I do not know who that is?

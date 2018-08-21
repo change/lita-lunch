@@ -59,6 +59,10 @@ module Lita
           redis.hset(REDIS_KEY, @id, data.to_json)
         end
 
+        def user
+          Lita::User.find_by_id(@id)
+        end
+
         def self.from_json(robot, json)
           return nil unless json
           begin
