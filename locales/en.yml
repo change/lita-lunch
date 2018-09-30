@@ -20,9 +20,9 @@ en:
               description: Add @user to the next lunch roulette.
         office:
           create:
-            success: Ok, I have created the office named “%{name}” in the %{timezone} timezone.
+            success: 'Ok, I have created the office named “%{name}” in the %{timezone} timezone with channel #%{room}.'
             help:
-              command: lunch create office <name> <timezone>
+              command: lunch create office <name> <channel> <timezone>
               description: Create a new office in a given timezone (requires an admin)
             error:
               exists: Sorry, the office named “%{name}” already exists.

@@ -5,6 +5,7 @@
 RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
   let(:betelgeuse) { Lita::Room.create_or_update('betelgeuse') }
   let(:magrathea) { Lita::Room.create_or_update('magrathea') }
+  let(:milliways) { Lita::Room.create_or_update('magrathea') }
 
   it { is_expected.to route_command('lunch today').to(:participate) }
   it { is_expected.to route_command('lunch today @zaphod').to(:participate) }
@@ -42,7 +43,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
       context 'when the user has an office' do
         before do
           robot.auth.add_user_to_group!(user, :lunch_admins)
-          send_command('lunch create office Magrathea UTC')
+          send_command("lunch create office Magrathea #{magrathea.name} UTC")
           send_command("lunch office @#{target_user.mention_name} Magrathea")
         end
 
@@ -96,7 +97,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
       end
 
       context 'when the timezone is not valid' do
-        let(:command) { 'lunch create office Milliways #milliways End-of-the-Universe' }
+        let(:command) { "lunch create office Milliways #{milliways.name} End-of-the-Universe" }
 
         it 'informs the user' do
           send_command(command)
@@ -107,7 +108,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
       end
 
       context 'when the office already exists' do
-        let(:command) { "lunch create office Magrathea ##{magrathea.name} UTC" }
+        let(:command) { "lunch create office Magrathea #{magrathea.name} UTC" }
 
         before do
           send_command(command.sub(/UTC/, 'PST8PDT'))
@@ -125,7 +126,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
       end
 
       it 'creates the office' do
-        send_command("lunch create office Magrathea ##{magrathea.name} UTC")
+        send_command("lunch create office Magrathea #{magrathea.name} UTC")
         send_command('lunch list offices')
         expect(replies.last).to include 'Magrathea'
       end
@@ -135,8 +136,8 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
   describe '#list_offices' do
     before do
       robot.auth.add_user_to_group!(user, :lunch_admins)
-      send_command("lunch create office Magrathea ##{magrathea.name} UTC")
-      send_command("lunch create office Betelgeuse ##{betelgeuse.name} UTC")
+      send_command("lunch create office Magrathea #{magrathea.name} UTC")
+      send_command("lunch create office Betelgeuse #{betelgeuse.name} UTC")
     end
 
     it 'lists offices alphabetically' do
@@ -154,7 +155,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
     context 'when the user has an office' do
       before do
         robot.auth.add_user_to_group!(user, :lunch_admins)
-        send_command("lunch create office Magrathea ##{magrathea.name} UTC")
+        send_command("lunch create office Magrathea #{magrathea.name} UTC")
         send_command('lunch office Magrathea')
       end
 
@@ -187,7 +188,7 @@ RSpec.describe Lita::Handlers::Lunch::Chat, lita_handler: true do
     context 'when the office exists' do
       before do
         robot.auth.add_user_to_group!(user, :lunch_admins)
-        send_command("lunch create office Magrathea ##{magrathea.name} UTC")
+        send_command("lunch create office Magrathea #{magrathea.name} UTC")
       end
 
       it 'adds the office to the user' do

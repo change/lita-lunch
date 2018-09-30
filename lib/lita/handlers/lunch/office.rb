@@ -31,6 +31,7 @@ module Lita
 
           if room
             @room = room.respond_to?(:id) ? room : (Lita::Room.find_by_name(room) || Lita::Room.find_by_id(room))
+            raise "cannot find room #{room}" unless @room
           end
 
           @timezone = timezone.respond_to?(:canonical_identifier) ? timezone : TZInfo::Timezone.get(timezone.to_s)
@@ -38,7 +39,7 @@ module Lita
 
         def save
           redis.hset(REDIS_KEY, self.class.normalize_name(@name),
-                     { name: @name, room: room&.name, timezone: @timezone.canonical_identifier }.to_json)
+                     { name: @name, room: room&.id, timezone: @timezone.canonical_identifier }.to_json)
         end
 
         def add_participant(participant)
@@ -49,8 +50,8 @@ module Lita
           redis.srem("#{REDIS_PREFIX}:#{@room.id}", participant.id)
         end
 
-        def participants
-          redis.smembers("#{REDIS_PREFIX}:#{@room.id}").map { |id| Participant.find(id) }
+        def participants(robot)
+          redis.smembers("#{REDIS_PREFIX}:#{@room.id}").map { |id| Participant.find(robot, id) }
         end
 
         def as_json
@@ -74,7 +75,7 @@ module Lita
         end
 
         def self.normalize_name(name)
-          name.downcase
+          name.downcase.gsub(/\W+/, '_')
         end
       end
     end

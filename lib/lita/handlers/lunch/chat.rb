@@ -52,6 +52,7 @@ module Lita
 
         def create_office(response)
           (name, channel, tz) = response.matches.first
+
           begin
             office = Office.find(robot, name)
 
@@ -67,7 +68,7 @@ module Lita
           end
 
           office.save
-          response.reply(t('office.create.success', name: name, timezone: office.timezone.name))
+          response.reply(t('office.create.success', name: name, timezone: office.timezone.name, room: office.room))
         end
 
         def list_offices(response)

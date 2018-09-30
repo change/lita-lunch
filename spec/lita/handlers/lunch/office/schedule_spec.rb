@@ -11,7 +11,7 @@ RSpec.describe Lita::Handlers::Lunch::Office::Schedule do
 
   let(:robot) { instance_double 'Lita::Robot' }
   # let(:robot) { Robot.new(registry) }
-  let(:room) { instance_double 'Lita::Room' }
+  let(:room) { instance_double 'Lita::Room', id: 42 }
 
   let(:offices) { [office_london, office_nyc, office_sf] }
 
@@ -95,7 +95,7 @@ RSpec.describe Lita::Handlers::Lunch::Office::Schedule do
         end
 
         include_context 'does not call send_groups' do
-          let(:groups_targets) { offices  - [target_office] }
+          let(:groups_targets) { offices - [target_office] }
         end
 
         before do

@@ -6,7 +6,7 @@ RSpec.describe Lita::Handlers::Lunch::Office do
   let(:robot) { instance_double 'Lita::Robot' }
 
   let(:name) { 'Office Name' }
-  let(:room) { instance_double 'Lita::Room' }
+  let(:room) { Lita::Room.create_or_update('magrathea') }
   let(:timezone) { 'PST8PDT' }
 
   describe '#new' do
