@@ -14,11 +14,13 @@ module Lita
             module ClassMethods
               def run_schedule(robot)
                 # TODO: Allow Offices to have their own schedules
-                all(robot).each do |office|
+                all(robot).map do |office|
                   time = office.timezone.now # The TZ field is always UTC, but everything else appears correct
-                  next unless PrivateMethods.check_wday(time, office)
-                  next unless PrivateMethods.check_reminder(time, office, robot)
-                  PrivateMethods.check_groups(time, office, robot)
+                  err = { time: time.strftime('%F %T'), zone: office.timezone, office: office.name }
+                  next err.merge(err: 'No schedule') unless PrivateMethods.check_wday(time, office)
+                  next err.merge(notice: 'Sent reminders') unless PrivateMethods.check_reminder(time, office, robot)
+                  next err.merge(notice: 'Sent groups') unless PrivateMethods.check_groups(time, office, robot)
+                  err.merge(noop: 'noop')
                 end
               end
             end
@@ -30,7 +32,7 @@ module Lita
               end
 
               def send_groups(robot)
-                today = participants.select(&:include_in_next).shuffle
+                today = participants(robot).select(&:include_in_next).shuffle
 
                 groups = PrivateMethods.make_groups(today)
 
