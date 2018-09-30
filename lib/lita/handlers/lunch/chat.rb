@@ -12,8 +12,8 @@ module Lita
         namespace 'lunch'
 
         route(/^lunch today\s*(?:for\s+)?(@.*?)?\s*$/, :participate, command: true, help: {
-                t('office.participate.help.self.command') => t('office.participate.help.self.description'),
-                t('office.participate.help.other.command') => t('office.participate.help.other.description')
+                t('participate.help.self.command') => t('participate.help.self.description'),
+                t('participate.help.other.command') => t('participate.help.other.description')
               })
 
         route(/^lunch list offices?$/, :list_offices, command: true, help: {
